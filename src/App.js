@@ -1,42 +1,43 @@
 import React, { Component } from 'react'
 import ListContacts from './ListContacts'
+import * as ContactsAPI from './utils/ContactsAPI'
+import CreateContact from './CreateContact'
 
 class App extends Component {
   state = {
-    contacts: [
-      {
-        "id": "ryan",
-        "name": "Ryan Florence",
-        "email": "ryan@reacttraining.com",
-        "avatarURL": "http://localhost:5001/ryan.jpg"
-      },
-      {
-        "id": "michael",
-        "name": "Michael Jackson",
-        "email": "michael@reacttraining.com",
-        "avatarURL": "http://localhost:5001/michael.jpg"
-      },
-      {
-        "id": "tyler",
-        "name": "Tyler McGinnis",
-        "email": "tyler@reacttraining.com",
-        "avatarURL": "http://localhost:5001/tyler.jpg"
-      }
-    ]
+    screen: 'list', // list, create
+    contacts: []
+  }
+
+  componentDidMount() {
+    ContactsAPI.getAll().then((contacts) => {
+      this.setState({ contacts: contacts })
+    })
   }
 
   removeContact = (contact) => {
     this.setState((state) => ({
       contacts: state.contacts.filter((c) => c.id !== contact.id)
     }))
+
+    // TODO: find out if there's a way of doing this that doesn't involve
+    // editing the state in two locations
+    ContactsAPI.remove(contact)
   }
 
   render() {
     return (
-      <ListContacts
-        onDeleteContact={this.removeContact}
-        contacts={this.state.contacts}
-      />
+      <div className="app">
+        {this.state.screen === 'list' && (
+          <ListContacts
+            onDeleteContact={this.removeContact}
+            contacts={this.state.contacts}
+          />
+        )}
+        {this.state.screen === 'create' && (
+          <CreateContact />
+        )}
+      </div>
     )
   }
 }
